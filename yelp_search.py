@@ -36,7 +36,7 @@ if len(sys.argv) < 3:
 	print 'Usage: python ' + sys.argv[0] + ' <filename> <location>'
 	exit(1)
 
-# Filename is passed in
+# Filename and location are passed in
 filename = sys.argv[1]
 location = sys.argv[2]
 
