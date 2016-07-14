@@ -1,0 +1,5 @@
+# API Access Keys
+config_secret.json
+
+# Text Files
+*.txt
