@@ -32,12 +32,13 @@ sheet.cell(row=rowNum, column=colNum + 9).value = 'Yelp Link'
 rowNum = 2
 
 # Check command line arguments
-if len(sys.argv) < 2:
-	print 'Usage: python ' + sys.argv[0] + ' <filename>'
+if len(sys.argv) < 3:
+	print 'Usage: python ' + sys.argv[0] + ' <filename> <location>'
 	exit(1)
 
 # Filename is passed in
 filename = sys.argv[1]
+location = sys.argv[2]
 
 # Open file for reading
 with open(filename) as f:
@@ -57,7 +58,7 @@ with open(filename) as f:
 		}
 
 		# Yelp Search API
-		response = client.search('Los Angeles', **params)
+		response = client.search(location, **params)
 
 		try:
 			# First result
