@@ -8,12 +8,10 @@ with io.open('config_secret.json') as cred:
     auth = Oauth1Authenticator(**creds)
     client = Client(auth)
 
-# Desired yelp rating
-target = 4
-
 # Open Excel document for writing
-wb = openpyxl.load_workbook('search_results.xlsx')
-sheet = wb.get_sheet_by_name('Sheet1')
+wb = openpyxl.Workbook()
+dest_filename = 'search_results.xlsx'
+sheet = wb.get_active_sheet()
 
 # Write labels on first row
 rowNum = 1
@@ -33,15 +31,20 @@ sheet.cell(row=rowNum, column=colNum + 9).value = 'Yelp Link'
 # Write data starting on second row
 rowNum = 2
 
-# Open text file for writing
-# out = open('search_results.txt', 'w')
+# Check command line arguments
+if len(sys.argv) < 2:
+	print 'Usage: python ' + sys.argv[0] + ' <filename>'
+	exit(1)
+
+# Filename is passed in
+filename = sys.argv[1]
 
 # Open file for reading
-filename = 'Regal Medical Group - PCPs.txt'
 with open(filename) as f:
 
 	# Each line is a separate search
 	for line in f:
+
 		# Start again at first column
 		colNum = 1
 
@@ -57,22 +60,23 @@ with open(filename) as f:
 		response = client.search('Los Angeles', **params)
 
 		try:
-			# Print search results with rating of at least target
-			# if response.businesses[0].rating >= target:
-			name = response.businesses[0].name
-			rating = response.businesses[0].rating
-			review_count = response.businesses[0].review_count
-			address_list = response.businesses[0].location.address
+			# First result
+			business = response.businesses[0]
+
+			name = business.name
+			rating = business.rating
+			review_count = business.review_count
+			address_list = business.location.address
 			# http://stackoverflow.com/questions/18272066/easy-way-to-convert-a-unicode-list-to-a-list-containing-python-strings
 			address_encoded = [x.encode('UTF8') for x in address_list]
 			# http://stackoverflow.com/questions/5618878/how-to-convert-list-to-string
 			address = ' '.join(address_encoded)
-			city = response.businesses[0].location.city
-			state = response.businesses[0].location.state_code
-			zipcode = response.businesses[0].location.postal_code
+			city = business.location.city
+			state = business.location.state_code
+			zipcode = business.location.postal_code
 			city_state_zipcode = city + ', ' + state + ' ' + zipcode
-			phone = response.businesses[0].display_phone
-			url = response.businesses[0].url
+			phone = business.display_phone
+			url = business.url
 
 			# Display search results
 			print line_search
@@ -87,6 +91,7 @@ with open(filename) as f:
 
 			# Write search results to Excel document
 			sheet.cell(row=rowNum, column=colNum).value = line_search
+			# Each business occupies one row, information across columns
 			colNum += 1
 
 			sheet.cell(row=rowNum, column=colNum).value = name
@@ -114,15 +119,11 @@ with open(filename) as f:
 			colNum += 1
 
 			sheet.cell(row=rowNum, column=colNum).value = url
+			# End of business, move to next row
 			rowNum += 1
 
-			# Write search results to text file
-			# out.write(line_search + '\n')
-			# out.write(name + '\n')
-			# out.write(str(rating) + '\n')
-			# out.write(str(review_count) + '\n')
-
 		# If list index out of range because no search results found
+		# Simply print/write search
 		except IndexError:
 			print line_search
 			print ''
@@ -131,6 +132,7 @@ with open(filename) as f:
 			rowNum += 1
 
 		# If NoneType because of missing information
+		# Simply print/write search
 		except TypeError:
 			print line_search
 			print ''
@@ -144,11 +146,8 @@ with open(filename) as f:
 			sys.exit()
 
 		finally:
-			# Save Excel document
-			wb.save('search_results.xlsx')
+			# Save Excel document before raise exceptions
+			wb.save(filename=dest_filename)
 
 # Save Excel document
-wb.save('search_results.xlsx')
-
-# Close text file
-# out.close()
+wb.save(filename=dest_filename)
