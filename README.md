@@ -1,6 +1,6 @@
 # Yelp Search
 
-Script that accepts a list of businesses and outputs an Excel file of Yelp search 
+Script that accepts a list of businesses and outputs an Excel file of Yelp search results
 
 ## Usage
 
